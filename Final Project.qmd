@@ -2,15 +2,18 @@
 title: "Final Project"
 editor: visual
 format: html
-toc: false
+pdf: default
+html: default
+
+
 about:
- template: trestles
+ template: solana
  image-shape: round
  image-width:  20cm
 chunk_output_type: inline
 ---
 
-# [**“ RESEARCH QUESTION - 1 ”**]{.underline}
+## [**RESEARCH QUESTION- 1**]{.underline}
 
 [**DATA DESCRIPTION**]{.underline}
 
@@ -106,7 +109,63 @@ When these two predictors have a negative interaction term, it usually means tha
 
 **Predicted Sleep Quality Across Age and Physical Activity Levels - Visualization:**
 
-![](images/clipboard-2189666198.png)
+**Project Code**
+
+```{r}
+# Load necessary libraries
+library(glmnet)
+library(plotly)
+library(ggplot2)
+# Load the dataset
+data1 <- read.csv("C:/Users/ACER/Desktop/New folder/Sai Sriram Uppada/FinalProject/Sleep_health_and_lifestyle_dataset.csv")  
+
+# Replace with the path to the original dataset
+
+# Prepare the data
+# Assuming 'Quality_of_Sleep' is a continuous variable and both 'Age' and 'Physical_Activity_Level' are already numerical.
+x <- model.matrix(Quality.of.Sleep ~ Age * Physical.Activity.Level, data = data1)[, -1]  # removing intercept
+y <- data1$Quality.of.Sleep
+
+# Fit Lasso Regression model
+lasso_model <- glmnet(x, y, alpha = 1)  # alpha = 1 for Lasso
+
+# Cross-validation for optimal lambda
+cv_lasso <- cv.glmnet(x, y, alpha = 1)
+
+coef(lasso_model, s = cv_lasso$lambda.min)
+# Plotting the coefficient path
+plot(lasso_model, xvar = "lambda", label = TRUE)
+# Create a ggplot
+
+
+
+# Plotting cross-validation plot to see the optimal lambda
+plot(cv_lasso)
+
+# Creating a new data frame for predictions
+age_range <- seq(min(data1$Age), max(data1$Age), by = 1)
+pa_levels <- seq(min(data1$Physical.Activity.Level), max(data1$Physical.Activity.Level), length.out = 100)
+
+# Creating a grid of Age and Physical Activity levels
+grid_data <- expand.grid(Age = age_range, Physical.Activity.Level = pa_levels)
+# Correcting newdata matrix generation
+grid_data_matrix <- model.matrix(~ Age * Physical.Activity.Level, data = grid_data)[, -1]
+# Predicting using the correct newx argument
+grid_data$Quality_of_Sleep_Pred <- predict(lasso_model, newx = grid_data_matrix, s = cv_lasso$lambda.min)
+
+# Plotting
+a = ggplot(grid_data, aes(x = Age, y = Physical.Activity.Level, fill = Quality_of_Sleep_Pred)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = median(grid_data$Quality_of_Sleep_Pred), space = "Lab", name = "Predicted\nSleep Quality") +
+  labs(x = "Age", y = "Physical Activity Level", title = "Predicted Sleep Quality Across Age and Physical Activity Levels") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+ggplotly(a)
+
+
+
+```
 
 **Color Gradient Representation**: The projected sleep quality is represented by a color scale ranging from purple to red, where purple denotes lower sleep quality (value of 6) and red denotes higher sleep quality (value of 9).
 
@@ -156,7 +215,7 @@ These findings underscore the importance of tailored health recommendations that
 
 **Interaction Effects**: More complex models that explore multiple interaction terms between variables could unearth additional layers of influence among the predictors of sleep quality.
 
-[**“ RESEARCH QUESTION - 2 ”**]{.underline}
+## [**RESEARCH QUESTION- 2**]{.underline}
 
 [**RESEARCH QUESTION**]{.underline}
 
@@ -272,7 +331,51 @@ For each observation in your dataset, the graph you gave shows a scatter plot co
 
 **Actual vs Predicted Sleep Quality – Visualization:**
 
-![](images/clipboard-1050132825.png)
+**Project Code**
+
+```{r}
+library(randomForest)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+
+# Load the dataset
+data1 <- read.csv("C:/Users/ACER/Desktop/New folder/Sai Sriram Uppada/FinalProject/Sleep_health_and_lifestyle_dataset.csv")  # Replace with the path to the original dataset
+
+# Split the "Blood Pressure" into "Systolic BP" and "Diastolic BP"
+data1 <- data1 %>%
+  mutate(Systolic.BP = as.integer(sub("/.*", "", Blood.Pressure)),
+         Diastolic.BP = as.integer(sub(".*/", "", Blood.Pressure)))
+
+# Fit Random Forest model to predict sleep quality
+set.seed(123)  # for reproducibility
+rf_model <- randomForest(Quality.of.Sleep ~ Age + Physical.Activity.Level + Stress.Level + Heart.Rate + Systolic.BP + Diastolic.BP, 
+                         data=data1, importance=TRUE, ntree=500)
+
+# Check out the model summary
+print(rf_model)
+
+# Variable importance plot
+importance_data <- importance(rf_model)
+varImpPlot(rf_model)
+
+# Predict sleep quality
+predicted_quality <- predict(rf_model, data1)
+
+# Create a plot of actual vs predicted sleep quality
+data1$Predicted_Quality_of_Sleep <- predicted_quality
+a = ggplot(data1, aes(x=Quality.of.Sleep, y=Predicted_Quality_of_Sleep)) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method='lm', color='red') +
+  labs(x="Actual Sleep Quality", y="Predicted Sleep Quality", title="Actual vs Predicted Sleep Quality") +
+  theme_minimal()
+
+
+# Convert ggplot object to an interactive plotly object
+ggplotly(a)
+
+
+```
 
 **Black dots, or data points:**
 
@@ -342,7 +445,7 @@ While the current analysis has yielded valuable insights, several questions rema
 
 The use of a Random Forest regression model has significantly advanced our understanding of what affects sleep quality and how these effects can be modeled. Moving forward, these insights not only pave the way for targeted health interventions but also open up several avenues for further research, ensuring continuous improvement in our approach to managing and enhancing sleep quality. The successful application of the Random Forest regression model in this context highlights the potential of machine learning in public health. By leveraging such models, stakeholders can gain actionable insights into health behaviors and outcomes, leading to better-informed decisions and strategies aimed at improving sleep quality across populations. Future research should continue to build on these findings, exploring new variables and methods to further enhance the understanding and management of sleep quality.
 
-[**“ RESEARCH QUESTION - 2 ”**]{.underline}
+## [**RESEARCH QUESTION- 3**]{.underline}
 
 [**RESEARCH QUESTION**]{.underline}
 
@@ -418,7 +521,56 @@ o   We will evaluate the model's performance using metrics suitable for binary
 
 **Body Mass Index (BMI) predicts the presence of sleep apnea – Visualization:**
 
-![](images/clipboard-2281338536.png)
+\`
+```{r}
+library(readr)
+library(dplyr)
+library(glmnet)
+library(ggplot2)
+
+# Load the dataset (adjust the file path as needed)
+sleep_data <- read.csv("C:/Users/ACER/Desktop/New folder/Sai Sriram Uppada/FinalProject/Sleep_health_and_lifestyle_dataset.csv") 
+
+# View the dataset to check column names and structure
+
+
+# Rename columns if needed to match the code
+# Assuming "BMI.Category" is the column containing BMI information
+colnames(sleep_data) <- gsub("\\.", "_", colnames(sleep_data))  # Replace dots with underscores
+
+# Prepare the predictor variables and the response
+# Assuming "BMI_Category" is the column name for BMI information
+sleep_data$Sleep_Apnea <- as.factor(ifelse(sleep_data$Sleep_Disorder == "Sleep Apnea", 1, 0))
+predictors <- model.matrix(~ BMI_Category, sleep_data)[, -1]
+response <- sleep_data$Sleep_Apnea
+
+
+# Fit logistic regression model
+fit_apnea <- glmnet(predictors, response, family = "binomial")
+
+# Print coefficients
+coef(fit_apnea)
+
+
+
+# Perform cross-validation
+cv_fit_apnea <- cv.glmnet(predictors, response, family = "binomial")
+best_lambda_apnea <- cv_fit_apnea$lambda.min
+
+
+# Load necessary libraries
+library(pROC)
+
+# Make predictions on the training set
+predictions_train <- predict(cv_fit_apnea, type = "response", s = "lambda.min", newx = predictors)
+
+# Calculate ROC curve
+roc_curve <- roc(as.numeric(response) - 1, predictions_train)  # Convert factor to numeric vector (0, 1)
+
+# Plot ROC curve with AUC
+plot(roc_curve, main = "ROC Curve", col = "blue")
+legend("bottomright", legend = paste("AUC =", round(auc(roc_curve), 2)), col = "blue", lty = 1)
+```
 
 **Interpretation:**
 

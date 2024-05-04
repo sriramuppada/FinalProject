@@ -3,6 +3,7 @@ title: "Mid Project Representations"
 editor: visual
 format: html
 toc: false
+
 about:
  template: trestles
  image-shape: round

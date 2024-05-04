@@ -2,7 +2,9 @@
 title: "Mid Project Codes"
 editor: visual
 format: html
-toc: false
+pdf: default
+html: default
+
 about:
  template: trestles
  image-shape: round

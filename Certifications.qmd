@@ -1,8 +1,10 @@
 ---
 title: "Certifications"
 editor: visual
-format: html
+pdf: default
 toc: false
+html: default
+
 about:
  template: trestles
  image-shape: round

@@ -8,12 +8,20 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - Myself.qmd
-      - Certifications.qmd
-      - Internships.qmd
-      - Mid Project Codes.qmd
-      - Mid Project Representations.qmd
-      - Final Project.qmd
+      - href: Myself.qmd
+        text: Myself
+      - href: Certifications.qmd
+        text: Certifications
+      - href: Internships.qmd
+        text: Internships
+      - href: Mid Project Codes.qmd
+        text: Mid Project Codes
+      - href: Mid Project Representations.qmd
+        text: Mid Project Representations
+      - href: Final Project.qmd
+        text: Final Project
+      - href: Final ProjectCode.qmd
+        text: Final ProjectCode
 
 format:
   html:
